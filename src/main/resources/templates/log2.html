@@ -1,8 +1,26 @@
-<html><head><title>Login Page</title></head><body onload='document.f.username.focus();'>
-<p><font color='red'>Your login attempt was not successful, try again.<br/><br/>Reason: Bad credentials</font></p><h3>Login with Username and Password</h3><form name='f' action='/login' method='POST'>
-    <table>
-        <tr><td>User:</td><td><input type='text' name='username' value=''/></td></tr>
-        <tr><td>Password:</td><td><input type='password' name='password'/></td></tr>
-        <tr><td colspan='2'><input name="submit" type="submit" value="Login"/></td></tr>
-    </table>
-</form></body></html>
+<!doctype html>
+<html ng-app="demo">
+<head>
+    <title>Hello AngularJS</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+
+</head>
+
+<body>
+<div ng-controller="Hello">
+    <p>The ID is {{greeting}}</p>
+    <p>The content is {{greeting.content}}</p>
+</div>
+</body>
+<script>
+
+    angular.module('demo', [])
+        .controller('Hello', function($scope, $http) {
+            $http.get('http://127.0.0.1:8080/f').
+            then(function(response) {
+                $scope.greeting = response.data;
+            });
+        });
+
+</script>
+</html>
