@@ -48,18 +48,9 @@ public class Test1
                 originalFileName, contentType, content);
 
         ParseFile parseFile = new ParseFile(result, ParseFile.DATE_PATTERT_ISO_8601);
-        Integer max = 0;
-        AssignmentTeam topTeam = null;
-        List<AssignmentTeam> teams = parseFile.getAssignmentTeams();
-        for (AssignmentTeam assignmentTeam : teams)
-        {
-            if (assignmentTeam.getDaysWorked() > max)
-            {
-                max = assignmentTeam.getDaysWorked();
-                topTeam = assignmentTeam;
-            }
-        }
 
+
+        AssignmentTeam topTeam = parseFile.getTopTeam();
         if (null != topTeam)
         {
             Integer days = topTeam.getDaysWorked();

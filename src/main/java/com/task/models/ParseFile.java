@@ -12,10 +12,9 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class ParseFile
+public class ParseFile implements EmployeesTogether
 {
     public static final String DATE_PATTERT_ISO_8601 = "yyyy-MM-dd";
-    private LinkedHashMap<Long,List<Employee>> employees;
     private   List<AssignmentTeam> assignmentTeams;
 
     public ParseFile(MultipartFile file, String pattern)
@@ -23,8 +22,8 @@ public class ParseFile
         BufferedReader br = null;
         String line = "";
         String cvsSplitBy = ",";
-        this.employees = new LinkedHashMap<>();
         List<Long> projectIds = new ArrayList<>();
+        List<Employee> employees = new ArrayList<>();
         try
         {
 
@@ -35,94 +34,58 @@ public class ParseFile
                 String[] data = line.split(cvsSplitBy);
 
                 if (data.length == 4 &&
-                        (data[0].trim().length() > 0  ) &&
-                        (data[1].trim().length() > 0 ) &&
-                         (data[2].trim().length() > 0 ) &&
-                        (data[3].trim().length() > 0 ))
+                        (data[0].trim().length() > 0) &&
+                        (data[1].trim().length() > 0) &&
+                        (data[2].trim().length() > 0) &&
+                        (data[3].trim().length() > 0))
                 {
-                    Long employeeId = Long.parseLong(data[0].trim());
+                    String employeeIdStr = data[0].trim();
+                    String projectIdStr = data[1].trim();
 
-                    Long projectId = Long.parseLong(data[1].trim());
-                    Date dateTo;
-                    Date dateFrom;
-                    try
-                    {
+                        Long employeeId = Long.parseLong(employeeIdStr);
+                        Long projectId = Long.parseLong(projectIdStr);
                         String dateToStr = data[2].trim();
                         String dateFromStr = data[3].trim();
-                        if (dateToStr.equalsIgnoreCase("NULL"))
-                        {
-                            dateTo = new Date();
-                        } else
-                        {
-                            dateTo = new SimpleDateFormat(pattern).parse(dateToStr);
-                        }
-                        if (dateFromStr.equalsIgnoreCase("NULL"))
-                        {
-                            dateFrom = new Date();
-                        } else
-                        {
-                            dateFrom = new SimpleDateFormat(pattern).parse(dateFromStr);
-                        }
+                        Date dateTo;
+                        Date dateFrom;
 
-                        Employee employee = new Employee(employeeId, projectId, dateTo, dateFrom);
-
-                        if (!projectIds.contains(projectId))
+                        try
                         {
-                            projectIds.add(projectId);
+                            if (dateToStr.equalsIgnoreCase("NULL"))
+                            {
+                                dateTo = new Date();
+                            } else
+                            {
+
+                                dateTo = new SimpleDateFormat(pattern).parse(dateToStr);
+                            }
+                            if (dateFromStr.equalsIgnoreCase("NULL"))
+                            {
+                                dateFrom = new Date();
+                            } else
+                            {
+                                dateFrom = new SimpleDateFormat(pattern).parse(dateFromStr);
+                            }
+
+                            Employee employee = new Employee(employeeId, projectId, dateTo, dateFrom);
+
+                            if (!projectIds.contains(projectId))
+                            {
+                                projectIds.add(projectId);
+                            }
+
+                            employees.add(employee);
+
+                            System.out.println(employee.toString());
+
+                        } catch (ParseException e)
+                        {
+                            e.printStackTrace();
                         }
-
-                        if (this.employees.containsKey(projectId) && !(this.getEmployees().get(projectId).contains(employee)))
-                        {
-                            this.employees.get(projectId).add(employee);
-                        } else
-                        {
-                            List<Employee> employeeList = new ArrayList<>();
-                            employeeList.add(employee);
-                            this.employees.put(projectId, employeeList);
-                        }
-
-                        System.out.println(employee.toString());
-                    } catch (ParseException e)
-                    {
-                        e.printStackTrace();
                     }
                 }
-            }
-               this.assignmentTeams = new ArrayList<>();
-            for (Long projectId : projectIds)
-            {
-                List<Employee> employees = this.employees.get(projectId);
-
-                for (Employee employee : employees)
-                {
-                    for (Employee employee1 : employees)
-                    {
-                        if ((employee.getDateFrom().compareTo(employee1.getDateFrom()) >= 0) && (employee.getDateFrom().compareTo(employee1.getDateTo()) <= 0 ) && !(employee.getId().equals(employee1.getId())))
-                        {
-                           Date dateToTogether;
-                            if (employee.getDateTo().compareTo(employee1.getDateTo()) <= 0)
-                            {
-                                dateToTogether = employee.getDateTo();
-                            }
-                            else
-                            {
-                                dateToTogether = employee1.getDateTo();
-                            }
-                            DateTime dateFrom = new DateTime(employee.getDateFrom());
-                            DateTime dateTo = new DateTime(dateToTogether);
-                            int days = Days.daysBetween(dateFrom, dateTo).getDays();
-                            AssignmentTeam assignmentTeam = new AssignmentTeam(employee, employee1, projectId, days);
-                            if (!this.assignmentTeams.contains(assignmentTeam))
-                            {
-                                this.assignmentTeams.add(assignmentTeam);
-                            }
-
-                        }
-                    }
-
-                }
-
-            }
+            LinkedHashMap<Long, List<Employee>> projectEmployees = this.projectEmployees(employees);
+            this.assignmentTeams = this.employeesAtSameTime(projectIds, projectEmployees);
 
 
         } catch (FileNotFoundException e)
@@ -147,6 +110,10 @@ public class ParseFile
     }
 
 
+    /**
+     *
+     * @return the team that has worked the most days
+     */
     public AssignmentTeam getTopTeam()
     {
         Integer max = 0;
@@ -163,6 +130,75 @@ public class ParseFile
         return topTeam;
     }
 
+    /**
+     *
+     * @param employees
+     * @return Employees that worked on same project
+     */
+    public LinkedHashMap<Long, List<Employee>> projectEmployees(List<Employee>employees)
+    {
+        LinkedHashMap<Long,List<Employee>>projectEmployees = new LinkedHashMap<>();
+
+
+        for (Employee employee : employees)
+        {
+            Long projectId = employee.getProjectId();
+
+            if (projectEmployees.containsKey(projectId) && !(projectEmployees.get(projectId).contains(employee)))
+            {
+                projectEmployees.get(projectId).add(employee);
+            } else
+            {
+                List<Employee> employeeList = new ArrayList<>();
+                employeeList.add(employee);
+                projectEmployees.put(projectId, employeeList);
+            }
+        }
+
+        return projectEmployees;
+    }
+
+
+    public List<AssignmentTeam> employeesAtSameTime(List<Long> projectIds, LinkedHashMap<Long,List<Employee>>  projectEmployees)
+    {
+        List<AssignmentTeam> assignmentTeams = new ArrayList<>();
+        for (Long projectId : projectIds)
+        {
+            List<Employee> employees = projectEmployees.get(projectId);
+
+            for (Employee employee : employees)
+            {
+                for (Employee employee1 : employees)
+                {
+                    if ((employee.getDateFrom().compareTo(employee1.getDateFrom()) >= 0) && (employee.getDateFrom().compareTo(employee1.getDateTo()) <= 0 ) && !(employee.getId().equals(employee1.getId())))
+                    {
+                        Date dateToTogether;
+                        if (employee.getDateTo().compareTo(employee1.getDateTo()) <= 0)
+                        {
+                            dateToTogether = employee.getDateTo();
+                        }
+                        else
+                        {
+                            dateToTogether = employee1.getDateTo();
+                        }
+                        DateTime dateFrom = new DateTime(employee.getDateFrom());
+                        DateTime dateTo = new DateTime(dateToTogether);
+                        int days = Days.daysBetween(dateFrom, dateTo).getDays();
+                        AssignmentTeam assignmentTeam = new AssignmentTeam(employee, employee1, projectId, days);
+                        if (!assignmentTeams.contains(assignmentTeam))
+                        {
+                            assignmentTeams.add(assignmentTeam);
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+        return assignmentTeams;
+    }
+
     public List<AssignmentTeam> getAssignmentTeams()
     {
         return assignmentTeams;
@@ -173,13 +209,4 @@ public class ParseFile
         this.assignmentTeams = assignmentTeams;
     }
 
-    public LinkedHashMap<Long, List<Employee>> getEmployees()
-    {
-        return employees;
-    }
-
-    public void setEmployees(LinkedHashMap<Long, List<Employee>> employees)
-    {
-        this.employees = employees;
-    }
 }
