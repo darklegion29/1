@@ -1,9 +1,7 @@
 package com.task.models;
 
-import com.task.libs.TimeBetween;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.joda.time.Weeks;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -90,7 +88,7 @@ public class ParseFile
                 {
                     for (Employee employee1 : employees)
                     {
-                        if ((employee.getDateFrom().compareTo(employee1.getDateFrom()) >= 0) && (employee.getDateFrom().compareTo(employee1.getDateTo()) <= 0 ))
+                        if ((employee.getDateFrom().compareTo(employee1.getDateFrom()) >= 0) && (employee.getDateFrom().compareTo(employee1.getDateTo()) <= 0 ) && !(employee.getId().equals(employee1.getId())))
                         {
                            Date largestDate;
                             if (employee.getDateTo().compareTo(employee.getDateTo()) >= 0)

@@ -1,5 +1,6 @@
 package com.task.controllers;
 
+import com.task.models.AssignmentTeam;
 import com.task.models.ParseFile;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,16 +25,21 @@ public class FileController
     }
 
     @RequestMapping( "/upload")
-    public LinkedHashMap<Long, Long> upload(MultipartFile file)
+    public AssignmentTeam upload(MultipartFile file)
     {
-        ParseFile parseFile = new ParseFile(file,ParseFile.DATE_PATTERT_ISO_8601);
+        ParseFile parseFile = new ParseFile(file, ParseFile.DATE_PATTERT_ISO_8601);
+        Integer max = 0;
+        AssignmentTeam topTeam = null;
+        for (AssignmentTeam assignmentTeam : parseFile.getAssignmentTeams())
+        {
+            if (assignmentTeam.getDaysWorked() > max)
+            {
+                max = assignmentTeam.getDaysWorked();
+                topTeam = assignmentTeam;
+            }
+        }
 
-        ModelAndView model = new ModelAndView();
-
-        LinkedHashMap<Long,Long> hashMap = new LinkedHashMap<>();
-        hashMap.put(2L,3L);
-        model.setViewName("data");
-        return hashMap;
+        return topTeam;
     }
 
     @RequestMapping( "/data")
