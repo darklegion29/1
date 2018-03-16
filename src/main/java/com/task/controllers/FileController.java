@@ -28,31 +28,7 @@ public class FileController
     public AssignmentTeam upload(MultipartFile file)
     {
         ParseFile parseFile = new ParseFile(file, ParseFile.DATE_PATTERT_ISO_8601);
-        Integer max = 0;
-        AssignmentTeam topTeam = null;
-        for (AssignmentTeam assignmentTeam : parseFile.getAssignmentTeams())
-        {
-            if (assignmentTeam.getDaysWorked() > max)
-            {
-                max = assignmentTeam.getDaysWorked();
-                topTeam = assignmentTeam;
-            }
-        }
-
-        return topTeam;
+       return parseFile.getTopTeam();
     }
 
-    @RequestMapping( "/data")
-    public LinkedHashMap<Long, Long> data()
-    {
-       // ParseFile parseFile = new ParseFile(file,ParseFile.DATE_PATTERT_ISO_8601);
-
-
-        ModelAndView model = new ModelAndView();
-
-        model.setViewName("data");
-        LinkedHashMap<Long,Long> hashMap = new LinkedHashMap<>();
-        hashMap.put(2L,3L);
-        return hashMap ;
-    }
 }

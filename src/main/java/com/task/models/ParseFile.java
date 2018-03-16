@@ -33,50 +33,59 @@ public class ParseFile
             while ((line = br.readLine()) != null)
             {
                 String[] data = line.split(cvsSplitBy);
-                Long employeeId = Long.parseLong(data[0].trim());
-                Long projectId = Long.parseLong(data[1].trim());
-                Date dateTo;
-                Date dateFrom;
-                try
+
+                if (data.length == 4 &&
+                        (data[0].trim().length() > 0  ) &&
+                        (data[1].trim().length() > 0 ) &&
+                         (data[2].trim().length() > 0 ) &&
+                        (data[3].trim().length() > 0 ))
                 {
-                    String dateToStr = data[2].trim();
-                    String dateFromStr = data[3].trim();
-                    if (dateToStr.equalsIgnoreCase("NULL"))
-                    {
-                        dateTo = new Date();
-                    } else
-                    {
-                        dateTo = new SimpleDateFormat(pattern).parse(dateToStr);
-                    }
-                    if (dateFromStr.equalsIgnoreCase("NULL"))
-                    {
-                        dateFrom = new Date();
-                    } else
-                    {
-                        dateFrom = new SimpleDateFormat(pattern).parse(dateFromStr);
-                    }
+                    Long employeeId = Long.parseLong(data[0].trim());
 
-                    Employee employee = new Employee(employeeId, projectId, dateTo, dateFrom);
-
-                    if (!projectIds.contains(projectId))
+                    Long projectId = Long.parseLong(data[1].trim());
+                    Date dateTo;
+                    Date dateFrom;
+                    try
                     {
-                        projectIds.add(projectId);
+                        String dateToStr = data[2].trim();
+                        String dateFromStr = data[3].trim();
+                        if (dateToStr.equalsIgnoreCase("NULL"))
+                        {
+                            dateTo = new Date();
+                        } else
+                        {
+                            dateTo = new SimpleDateFormat(pattern).parse(dateToStr);
+                        }
+                        if (dateFromStr.equalsIgnoreCase("NULL"))
+                        {
+                            dateFrom = new Date();
+                        } else
+                        {
+                            dateFrom = new SimpleDateFormat(pattern).parse(dateFromStr);
+                        }
+
+                        Employee employee = new Employee(employeeId, projectId, dateTo, dateFrom);
+
+                        if (!projectIds.contains(projectId))
+                        {
+                            projectIds.add(projectId);
+                        }
+
+                        if (this.employees.containsKey(projectId) && !(this.getEmployees().get(projectId).contains(employee)))
+                        {
+                            this.employees.get(projectId).add(employee);
+                        } else
+                        {
+                            List<Employee> employeeList = new ArrayList<>();
+                            employeeList.add(employee);
+                            this.employees.put(projectId, employeeList);
+                        }
+
+                        System.out.println(employee.toString());
+                    } catch (ParseException e)
+                    {
+                        e.printStackTrace();
                     }
-
-                    if (this.employees.containsKey(projectId) && !(this.getEmployees().get(projectId).contains(employee)))
-                    {
-                        this.employees.get(projectId).add(employee);
-                    } else
-                    {
-                        List<Employee> employeeList = new ArrayList<>();
-                        employeeList.add(employee);
-                        this.employees.put(projectId,employeeList);
-                    }
-
-                    System.out.println(employee.toString());
-                } catch (ParseException e)
-                {
-                    e.printStackTrace();
                 }
             }
                this.assignmentTeams = new ArrayList<>();
@@ -135,6 +144,23 @@ public class ParseFile
                 }
             }
         }
+    }
+
+
+    public AssignmentTeam getTopTeam()
+    {
+        Integer max = 0;
+        AssignmentTeam topTeam = null;
+        for (AssignmentTeam assignmentTeam : this.getAssignmentTeams())
+        {
+            if (assignmentTeam.getDaysWorked() > max)
+            {
+                max = assignmentTeam.getDaysWorked();
+                topTeam = assignmentTeam;
+            }
+        }
+
+        return topTeam;
     }
 
     public List<AssignmentTeam> getAssignmentTeams()
