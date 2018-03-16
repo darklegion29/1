@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="demo">
+<head>
+
+</head>
+
+<body>
+<div style=" alignment: center" ng-controller="FileController">
+    <table width="30%" border="0" cellspacing="0" cellpadding="0" align="center" >
+    <tr>
+        <th> Employee ID #1</th>
+        <th> Employee ID #2</th>
+        <th>Project ID</th>
+        <th> Days worked</th>
+    </tr>
+    <tr>
+        <td  class="centerText">{{data}}</td>
+        <td class="centerText">Smith</td>
+        <td class="centerText">50</td>
+        <td class="centerText">50</td>
+    </tr>
+
+</table>
+</div>
+</body>
+<style>
+    .centerText{
+        text-align: center;
+    }
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+
+<script>
+
+    angular.module('demo', [])
+        .controller('FileController', function($scope, $http) {
+            $http.get('http://127.0.0.1:8080/data').
+            then(function(response) {
+                $scope.data = response.data;
+            });
+        });
+
+</script>
+
+</html>

@@ -1,9 +1,12 @@
 package com.task.models;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import com.task.libs.TimeBetween;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Weeks;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,19 +16,22 @@ import java.util.List;
 
 public class ParseFile
 {
-
+    public static final String DATE_PATTERT_ISO_8601 = "yyyy-MM-dd";
     private LinkedHashMap<Long,List<Employee>> employees;
+    private   List<AssignmentTeam> assignmentTeams;
 
-    public ParseFile(String path ,String pattern)
+    public ParseFile(MultipartFile file, String pattern)
     {
         BufferedReader br = null;
         String line = "";
         String cvsSplitBy = ",";
         this.employees = new LinkedHashMap<>();
+        List<Long> projectIds = new ArrayList<>();
         try
         {
 
-            br = new BufferedReader(new FileReader(path));
+            InputStream is = file.getInputStream();
+            br = new BufferedReader(new InputStreamReader(is));
             while ((line = br.readLine()) != null)
             {
                 String[] data = line.split(cvsSplitBy);
@@ -54,6 +60,11 @@ public class ParseFile
 
                     Employee employee = new Employee(employeeId, projectId, dateTo, dateFrom);
 
+                    if (!projectIds.contains(projectId))
+                    {
+                        projectIds.add(projectId);
+                    }
+
                     if (this.employees.containsKey(projectId) && !(this.getEmployees().get(projectId).contains(employee)))
                     {
                         this.employees.get(projectId).add(employee);
@@ -69,8 +80,39 @@ public class ParseFile
                 {
                     e.printStackTrace();
                 }
+            }
+               this.assignmentTeams = new ArrayList<>();
+            for (Long projectId : projectIds)
+            {
+                List<Employee> employees = this.employees.get(projectId);
+
+                for (Employee employee : employees)
+                {
+                    for (Employee employee1 : employees)
+                    {
+                        if ((employee.getDateFrom().compareTo(employee1.getDateFrom()) >= 0) && (employee.getDateFrom().compareTo(employee1.getDateTo()) <= 0 ))
+                        {
+                           Date largestDate;
+                            if (employee.getDateTo().compareTo(employee.getDateTo()) >= 0)
+                            {
+                                largestDate = employee.getDateTo();
+                            }
+                            else
+                            {
+                                largestDate = employee1.getDateTo();
+                            }
+                            DateTime dateFrom = new DateTime(employee.getDateFrom());
+                            DateTime dateTo = new DateTime(largestDate);
+                            int days = Days.daysBetween(dateFrom, dateTo).getDays();
+                            this.assignmentTeams.add(new AssignmentTeam(employee,employee1,projectId,days));
+
+                        }
+                    }
+
+                }
 
             }
+
 
         } catch (FileNotFoundException e)
         {
@@ -91,6 +133,16 @@ public class ParseFile
                 }
             }
         }
+    }
+
+    public List<AssignmentTeam> getAssignmentTeams()
+    {
+        return assignmentTeams;
+    }
+
+    public void setAssignmentTeams(List<AssignmentTeam> assignmentTeams)
+    {
+        this.assignmentTeams = assignmentTeams;
     }
 
     public LinkedHashMap<Long, List<Employee>> getEmployees()

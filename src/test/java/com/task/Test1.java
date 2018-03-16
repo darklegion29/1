@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.multipart.MultipartFile;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Main.class)
@@ -29,7 +30,8 @@ public class Test1
         String path = "C:\\Users\\DarkleGion\\Desktop\\danni.txt";
         String pattern = "yyyy-MM-dd";
 
-        ParseFile parseFile = new ParseFile(path, pattern);
+       // MultipartFile multipartFile = new
+      //  ParseFile parseFile = new ParseFile(path, ParseFile.DATE_PATTERT_ISO_8601);
     }
 
 }

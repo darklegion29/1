@@ -1,26 +1,63 @@
-<!doctype html>
-<html ng-app="demo">
-<head>
-    <title>Hello AngularJS</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+<html ng-app="myApp">
+<div ng-controller = "myCtrl">
+    <input type = "file" file-model = "myFile"/>
+    <button ng-click = "uploadFile()">Upload File</button>
+    <table width="30%" border="0" cellspacing="0" cellpadding="0" align="center" >
+        <tr>
+            <th> Employee ID #1</th>
+            <th> Employee ID #2</th>
+            <th>Project ID</th>
+            <th> Days worked</th>
+        </tr>
+        <tr>
+            <td  class="centerText">{{data}}</td>
+            <td class="centerText">Smith</td>
+            <td class="centerText">50</td>
+            <td class="centerText">50</td>
+        </tr>
 
-</head>
-
-<body>
-<div ng-controller="Hello">
-    <p>The ID is {{greeting}}</p>
-    <p>The content is {{greeting.content}}</p>
+    </table>
 </div>
-</body>
-<script>
-
-    angular.module('demo', [])
-        .controller('Hello', function($scope, $http) {
-            $http.get('http://127.0.0.1:8080/f').
-            then(function(response) {
-                $scope.greeting = response.data;
-            });
-        });
-
-</script>
 </html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+<script>
+    var myApp = angular.module('myApp', []);
+    myApp.directive('fileModel', ['$parse', function ($parse) {
+        return {
+            restrict: 'A',
+            link: function(scope, element, attrs) {
+                var model = $parse(attrs.fileModel);
+                var modelSetter = model.assign;
+                element.bind('change', function(){
+                    scope.$apply(function(){
+                        modelSetter(scope, element[0].files[0]);
+                    });
+                });
+            }
+        };
+    }]);
+    myApp.service('fileUpload', ['$http', function ($http) {
+        this.uploadFileToUrl = function($scope,file, uploadUrl){
+            var fd = new FormData();
+            fd.append('file', file);
+            $http.post(uploadUrl, fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            }).then(function(response) {
+                $scope.data = response.data;
+            })
+                .success(function(){
+                })
+                .error(function(){
+                });
+        }
+    }]);
+    myApp.controller('myCtrl', ['$scope', 'fileUpload', function($scope, fileUpload){
+        $scope.uploadFile = function(){
+            var file = $scope.myFile;
+            var uploadUrl = "/upload";
+            fileUpload.uploadFileToUrl($scope,file, uploadUrl);
+        };
+    }]);
+</script>
