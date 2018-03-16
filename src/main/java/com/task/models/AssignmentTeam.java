@@ -1,5 +1,7 @@
 package com.task.models;
 
+import java.util.Objects;
+
 public class AssignmentTeam
 {
     private Employee employee;
@@ -61,4 +63,18 @@ public class AssignmentTeam
     {
         this.daysWorked = daysWorked;
     }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssignmentTeam that = (AssignmentTeam) o;
+        return employee.getId().equals(that.employee.getId()) &&
+                (employeeSecond.getId().equals(that.employeeSecond.getId())) ||
+                employee.getId().equals(that.employeeSecond.getId()) &&
+                        (employeeSecond.getId().equals(that.employee.getId())) ;
+    }
+
+
 }

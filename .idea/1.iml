@@ -39,6 +39,8 @@
     <orderEntry type="library" name="Spring Batch-2.2.6" level="project" />
     <orderEntry type="library" name="angular" level="application" />
     <orderEntry type="library" name="jquery" level="application" />
+    <orderEntry type="library" name="angular" level="application" />
+    <orderEntry type="library" name="jquery" level="application" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework.boot:spring-boot-starter-test:1.5.6.RELEASE" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework.boot:spring-boot-test:1.5.6.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:1.5.6.RELEASE" level="project" />
@@ -94,7 +96,5 @@
     <orderEntry type="library" name="Maven: org.unbescape:unbescape:1.1.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.groovy:groovy:2.4.12" level="project" />
-    <orderEntry type="library" name="angular" level="application" />
-    <orderEntry type="library" name="jquery" level="application" />
   </component>
 </module>

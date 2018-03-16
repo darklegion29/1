@@ -90,19 +90,23 @@ public class ParseFile
                     {
                         if ((employee.getDateFrom().compareTo(employee1.getDateFrom()) >= 0) && (employee.getDateFrom().compareTo(employee1.getDateTo()) <= 0 ) && !(employee.getId().equals(employee1.getId())))
                         {
-                           Date largestDate;
-                            if (employee.getDateTo().compareTo(employee.getDateTo()) >= 0)
+                           Date dateToTogether;
+                            if (employee.getDateTo().compareTo(employee1.getDateTo()) <= 0)
                             {
-                                largestDate = employee.getDateTo();
+                                dateToTogether = employee.getDateTo();
                             }
                             else
                             {
-                                largestDate = employee1.getDateTo();
+                                dateToTogether = employee1.getDateTo();
                             }
                             DateTime dateFrom = new DateTime(employee.getDateFrom());
-                            DateTime dateTo = new DateTime(largestDate);
+                            DateTime dateTo = new DateTime(dateToTogether);
                             int days = Days.daysBetween(dateFrom, dateTo).getDays();
-                            this.assignmentTeams.add(new AssignmentTeam(employee,employee1,projectId,days));
+                            AssignmentTeam assignmentTeam = new AssignmentTeam(employee, employee1, projectId, days);
+                            if (!this.assignmentTeams.contains(assignmentTeam))
+                            {
+                                this.assignmentTeams.add(assignmentTeam);
+                            }
 
                         }
                     }
